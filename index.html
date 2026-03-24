@@ -2,156 +2,597 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SaviOrientation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
 <style>
-body {
-    font-family: Arial;
-    background: #0f172a;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --border: #2a2a2a;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --text: #e8e8e8;
+    --text-muted: #6b6b6b;
+    --text-dim: #9a9a9a;
+    --bot-bg: #1a1a1a;
+    --user-bg: #1e2d4a;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
     height: 100vh;
-}
-.container {
-    width: 350px;
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 10px;
-}
-input, button {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(79,142,247,0.6);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.5; transform:scale(0.85); }
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  header span {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: auto;
+    font-weight: 300;
+  }
+
+  /* ONBOARDING SCREEN */
+  #onboarding {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 40px 24px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .onboarding-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 560px;
+  }
+
+  .onboarding-title span {
+    color: var(--accent);
+  }
+
+  .onboarding-sub {
+    font-size: 15px;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 420px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .onboarding-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     width: 100%;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-}
-button {
-    background: #38bdf8;
+    max-width: 420px;
+  }
+
+  .onboarding-form label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    display: block;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .onboarding-form input {
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .onboarding-form input:focus {
+    border-color: var(--accent);
+  }
+
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+
+  .spec-chip {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 13px;
     cursor: pointer;
-}
-.chat {
+    transition: all 0.15s;
+    text-align: center;
+    user-select: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .spec-chip:hover { border-color: var(--accent); color: var(--text); }
+  .spec-chip.selected {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .spec-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .btn-start {
+    padding: 15px 32px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-start:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-start:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  /* CHAT SCREEN */
+  #chat-screen {
+    flex: 1;
     display: none;
-}
-.messages {
-    height: 300px;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #messages {
+    flex: 1;
     overflow-y: auto;
-    margin-bottom: 10px;
-}
-.bot {
-    background: #334155;
-    padding: 8px;
-    margin: 5px;
-    border-radius: 5px;
-}
-.user {
-    background: #38bdf8;
-    padding: 8px;
-    margin: 5px;
-    border-radius: 5px;
-    text-align: right;
-}
+    padding: 28px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+
+  #messages::-webkit-scrollbar { width: 4px; }
+  #messages::-webkit-scrollbar-track { background: transparent; }
+  #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    max-width: 740px;
+    width: 100%;
+    animation: msgIn 0.3s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .msg-row.bot { align-self: flex-start; }
+  .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .avatar.bot { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,142,247,0.3); }
+  .avatar.user { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+
+  .bubble {
+    padding: 13px 17px;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    line-height: 1.65;
+    max-width: 520px;
+  }
+
+  .bubble.bot {
+    background: var(--bot-bg);
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+  }
+
+  .bubble.user {
+    background: var(--user-bg);
+    border: 1px solid rgba(79,142,247,0.2);
+    border-top-right-radius: 4px;
+    color: #c8d8f5;
+  }
+
+  /* TYPING */
+  .typing-dots {
+    display: flex; gap: 5px; align-items: center; padding: 4px 0;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: dot 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+  /* INPUT BAR */
+  .input-bar {
+    padding: 16px 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .input-wrap {
+    max-width: 740px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    transition: border-color 0.2s;
+  }
+
+  .input-wrap:focus-within { border-color: rgba(79,142,247,0.5); }
+
+  #user-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    resize: none;
+    max-height: 120px;
+    min-height: 22px;
+    line-height: 1.5;
+  }
+
+  #user-input::placeholder { color: var(--text-muted); }
+
+  #send-btn {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+
+  #send-btn:hover { opacity: 0.85; }
+  #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  #send-btn svg { width: 16px; height: 16px; fill: white; }
+
+  .input-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    max-width: 740px;
+    margin: 8px auto 0;
+  }
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<!-- HEADER -->
+<header>
+  <div class="logo-dot"></div>
+  <h1>SaviOrientation</h1>
+  <span>Lycée Dominique Savio</span>
+</header>
 
-<div id="form">
-    <h2>SaviOrientation 🎓</h2>
-    <input id="name" placeholder="Prénom">
-    <input id="spe1" placeholder="Spécialité 1">
-    <input id="spe2" placeholder="Spécialité 2">
-    <input id="spe3" placeholder="Spécialité 3">
-    <button onclick="start()">Commencer</button>
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <div class="onboarding-title">
+    Quel choix de spé<br>te convient <span>vraiment</span> ?
+  </div>
+  <p class="onboarding-sub">
+    Je t'aide à réfléchir à la spécialité à abandonner en Terminale, selon ton profil et tes ambitions.
+  </p>
+
+  <div class="onboarding-form">
+    <div>
+      <label>Ton prénom</label>
+      <input type="text" id="prenom-input" placeholder="ex: Lucas" autocomplete="off" />
+    </div>
+
+    <div>
+      <label>Tes 3 spécialités actuelles</label>
+      <div class="spec-grid" id="spec-grid">
+        <!-- rempli par JS -->
+      </div>
+      <p class="spec-hint" id="spec-hint" style="margin-top:8px">Sélectionne exactement 3 spécialités</p>
+    </div>
+
+    <button class="btn-start" id="btn-start" disabled onclick="startChat()">
+      Commencer →
+    </button>
+  </div>
 </div>
 
-<div id="chat" class="chat">
-    <div class="messages" id="messages"></div>
-    <input id="input" placeholder="Écris ici...">
-    <button onclick="send()">Envoyer</button>
-</div>
-
+<!-- CHAT -->
+<div id="chat-screen">
+  <div id="messages"></div>
+  <div class="input-bar">
+    <div class="input-wrap">
+      <textarea id="user-input" rows="1" placeholder="Réponds à SaviOrientation..."></textarea>
+      <button id="send-btn" onclick="sendMessage()" title="Envoyer">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <p class="input-hint">Appuie sur Entrée pour envoyer · Maj+Entrée pour sauter une ligne</p>
+  </div>
 </div>
 
 <script>
-let step = 0;
-let userData = {};
+const SPECS = [
+  "Maths","Physique-Chimie","SVT","NSI",
+  "SES","HLP","HGEOSP","LLCE","AMC","Management","Droit et Éco"
+];
 
-function addMessage(text, sender) {
-    let div = document.createElement("div");
-    div.className = sender;
-    div.innerText = text;
-    document.getElementById("messages").appendChild(div);
+const SYSTEM_PROMPT = `Tu es SaviOrientation, un assistant intelligent spécialisé dans l'orientation scolaire des élèves de première du Lycée Dominique Savio.
+Ton objectif est d'aider les élèves à choisir quelle spécialité abandonner en Terminale.
+Tu fonctionnes comme un conseiller pédagogique :
+- Tu poses des questions sur leurs centres d'intérêt
+- Tu demandes leur projet professionnel
+- Tu prends en compte leurs spécialités actuelles (qui te seront communiquées au début)
+- Tu analyses leurs réponses de manière logique
+- Tu peux aussi tenir compte de leurs difficultés
+Tu dois :
+- Être sérieux mais accessible, chaleureux
+- Donner des conseils nuancés
+- Toujours justifier tes recommandations
+- Ne jamais être catégorique à 100%
+Tu peux t'appuyer sur ces règles générales :
+- Maths est important pour les études scientifiques et d'ingénieur
+- SVT est important pour médecine et biologie
+- Physique-Chimie est clé pour ingénierie et sciences
+- SES est utile pour économie et commerce
+- HLP est utile pour droit, lettres
+- NSI est utile pour informatique
+- AMC (Anglais Monde Contemporain) peut se combiner comme LLCE pour les filières internationales
+Tu fais des réponses courtes (3-5 phrases max).
+Tu poses souvent des questions pour affiner ton analyse.
+Tu peux détecter si une combinaison de spécialités semble cohérente ou non.
+⚠️ LIMITES STRICTES : Tu es UNIQUEMENT spécialisé dans l'orientation scolaire. Si l'utilisateur pose une question hors sujet, tu refuses poliment et tu rediriges vers l'orientation.`;
+
+const GROQ_API_KEY = "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"; // ← remplace ici
+
+let userName = "";
+let userSpecs = [];
+let history = [];
+
+// Build spec chips
+const grid = document.getElementById("spec-grid");
+SPECS.forEach(s => {
+  const chip = document.createElement("div");
+  chip.className = "spec-chip";
+  chip.textContent = s;
+  chip.onclick = () => toggleSpec(chip, s);
+  grid.appendChild(chip);
+});
+
+function toggleSpec(el, s) {
+  if (el.classList.contains("selected")) {
+    el.classList.remove("selected");
+    userSpecs = userSpecs.filter(x => x !== s);
+  } else {
+    if (userSpecs.length >= 3) return;
+    el.classList.add("selected");
+    userSpecs.push(s);
+  }
+  updateHint();
+  checkReady();
 }
 
-function start() {
-    userData.name = document.getElementById("name").value;
-    userData.spe = [
-        document.getElementById("spe1").value,
-        document.getElementById("spe2").value,
-        document.getElementById("spe3").value
-    ];
-
-    document.getElementById("form").style.display = "none";
-    document.getElementById("chat").style.display = "block";
-
-    addMessage("Salut " + userData.name + " 👋", "bot");
-
-    setTimeout(() => {
-        addMessage("Je vois que tu fais " + userData.spe.join(", ") + ".", "bot");
-    }, 500);
-
-    setTimeout(() => {
-        addMessage("Quels sont tes centres d'intérêt ?", "bot");
-    }, 1000);
+function updateHint() {
+  const hint = document.getElementById("spec-hint");
+  const n = userSpecs.length;
+  if (n === 0) hint.textContent = "Sélectionne exactement 3 spécialités";
+  else if (n < 3) hint.textContent = `${3 - n} spécialité${3-n>1?'s':''} restante${3-n>1?'s':''}`;
+  else hint.textContent = "✓ Parfait !";
 }
 
-function send() {
-    let input = document.getElementById("input");
-    let text = input.value;
-    addMessage(text, "user");
-
-    input.value = "";
-
-    if (step === 0) {
-        userData.interest = text;
-        setTimeout(() => {
-            addMessage("Ok intéressant 👀 Et tu as un projet plus tard ?", "bot");
-        }, 500);
-        step++;
-    }
-
-    else if (step === 1) {
-        userData.project = text;
-        setTimeout(() => {
-            analyze();
-        }, 500);
-        step++;
-    }
+function checkReady() {
+  const name = document.getElementById("prenom-input").value.trim();
+  document.getElementById("btn-start").disabled = !(name && userSpecs.length === 3);
 }
 
-function analyze() {
-    let result = "";
+document.getElementById("prenom-input").addEventListener("input", checkReady);
 
-    if (userData.project.includes("ingénieur") || userData.interest.includes("math")) {
-        result = "Je te conseille de garder Mathématiques.";
-    }
-    else if (userData.project.includes("médecine")) {
-        result = "Garde SVT, c'est important pour médecine.";
-    }
-    else {
-        result = "Tu pourrais envisager d'abandonner la spécialité où tu es le moins à l'aise.";
-    }
+async function startChat() {
+  userName = document.getElementById("prenom-input").value.trim();
+  document.getElementById("onboarding").style.display = "none";
+  const cs = document.getElementById("chat-screen");
+  cs.style.display = "flex";
 
-    addMessage("Analyse en cours... 🤖", "bot");
+  const initial = `Bonjour ${userName} ! Je suis SaviOrientation. Tu as actuellement les spécialités suivantes : ${userSpecs.join(", ")}. Je vais t'aider à réfléchir à celle que tu pourrais abandonner en Terminale. Pour commencer : quel est ton projet après le bac, même vague ? Tu as une idée de filière ou de métier qui t'attire ?`;
 
-    setTimeout(() => {
-        addMessage(result, "bot");
-    }, 1500);
+  history.push({ role: "assistant", content: initial });
+  appendMessage("bot", initial);
+  document.getElementById("user-input").focus();
 }
+
+function appendMessage(role, text) {
+  const msgs = document.getElementById("messages");
+  const row = document.createElement("div");
+  row.className = `msg-row ${role}`;
+
+  const av = document.createElement("div");
+  av.className = `avatar ${role}`;
+  av.textContent = role === "bot" ? "S" : userName.charAt(0).toUpperCase();
+
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${role}`;
+  bubble.textContent = text;
+
+  row.appendChild(av);
+  row.appendChild(bubble);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  return row;
+}
+
+function appendTyping() {
+  const msgs = document.getElementById("messages");
+  const row = document.createElement("div");
+  row.className = "msg-row bot";
+  row.id = "typing-row";
+
+  const av = document.createElement("div");
+  av.className = "avatar bot";
+  av.textContent = "S";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble bot";
+  bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+  row.appendChild(av);
+  row.appendChild(bubble);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing-row");
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById("user-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  input.style.height = "auto";
+  document.getElementById("send-btn").disabled = true;
+
+  appendMessage("user", text);
+  history.push({ role: "user", content: text });
+  appendTyping();
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...history
+        ],
+        max_tokens: 300,
+        temperature: 0.7
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.choices[0].message.content;
+    history.push({ role: "assistant", content: reply });
+
+    removeTyping();
+    appendMessage("bot", reply);
+  } catch (e) {
+    removeTyping();
+    appendMessage("bot", "Désolé, une erreur est survenue. Réessaie dans un instant.");
+    console.error(e);
+  }
+
+  document.getElementById("send-btn").disabled = false;
+  input.focus();
+}
+
+// Textarea auto-resize + Enter to send
+document.getElementById("user-input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+document.getElementById("user-input").addEventListener("input", function() {
+  this.style.height = "auto";
+  this.style.height = Math.min(this.scrollHeight, 120) + "px";
+});
 </script>
-
 </body>
 </html>
