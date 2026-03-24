@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>SaviOrientation</title>
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    width: 350px;
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+}
+input, button {
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+button {
+    background: #38bdf8;
+    cursor: pointer;
+}
+.chat {
+    display: none;
+}
+.messages {
+    height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+.bot {
+    background: #334155;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+}
+.user {
+    background: #38bdf8;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+    text-align: right;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div id="form">
+    <h2>SaviOrientation 🎓</h2>
+    <input id="name" placeholder="Prénom">
+    <input id="spe1" placeholder="Spécialité 1">
+    <input id="spe2" placeholder="Spécialité 2">
+    <input id="spe3" placeholder="Spécialité 3">
+    <button onclick="start()">Commencer</button>
+</div>
+
+<div id="chat" class="chat">
+    <div class="messages" id="messages"></div>
+    <input id="input" placeholder="Écris ici...">
+    <button onclick="send()">Envoyer</button>
+</div>
+
+</div>
+
+<script>
+let step = 0;
+let userData = {};
+
+function addMessage(text, sender) {
+    let div = document.createElement("div");
+    div.className = sender;
+    div.innerText = text;
+    document.getElementById("messages").appendChild(div);
+}
+
+function start() {
+    userData.name = document.getElementById("name").value;
+    userData.spe = [
+        document.getElementById("spe1").value,
+        document.getElementById("spe2").value,
+        document.getElementById("spe3").value
+    ];
+
+    document.getElementById("form").style.display = "none";
+    document.getElementById("chat").style.display = "block";
+
+    addMessage("Salut " + userData.name + " 👋", "bot");
+
+    setTimeout(() => {
+        addMessage("Je vois que tu fais " + userData.spe.join(", ") + ".", "bot");
+    }, 500);
+
+    setTimeout(() => {
+        addMessage("Quels sont tes centres d'intérêt ?", "bot");
+    }, 1000);
+}
+
+function send() {
+    let input = document.getElementById("input");
+    let text = input.value;
+    addMessage(text, "user");
+
+    input.value = "";
+
+    if (step === 0) {
+        userData.interest = text;
+        setTimeout(() => {
+            addMessage("Ok intéressant 👀 Et tu as un projet plus tard ?", "bot");
+        }, 500);
+        step++;
+    }
+
+    else if (step === 1) {
+        userData.project = text;
+        setTimeout(() => {
+            analyze();
+        }, 500);
+        step++;
+    }
+}
+
+function analyze() {
+    let result = "";
+
+    if (userData.project.includes("ingénieur") || userData.interest.includes("math")) {
+        result = "Je te conseille de garder Mathématiques.";
+    }
+    else if (userData.project.includes("médecine")) {
+        result = "Garde SVT, c'est important pour médecine.";
+    }
+    else {
+        result = "Tu pourrais envisager d'abandonner la spécialité où tu es le moins à l'aise.";
+    }
+
+    addMessage("Analyse en cours... 🤖", "bot");
+
+    setTimeout(() => {
+        addMessage(result, "bot");
+    }, 1500);
+}
+</script>
+
+</body>
+</html>
