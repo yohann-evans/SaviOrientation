@@ -1,10 +1,11 @@
 import discord
 import asyncio
 from discord.ext import commands
-from groq import AsyncGroq
-import os
+import anthropic
 
-groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+# Authentification OIDC (Workload Identity Federation) : détectée automatiquement par le SDK
+claude_client = anthropic.AsyncAnthropic()
+MODEL = "claude-haiku-5-5"
 
 MON_ID = 1113541776091914331
 pending_replies = {}
@@ -52,14 +53,22 @@ async def generate_reply(user_message, channel_id):
     # Garde les 10 derniers échanges max
     historique = conversations[channel_id][-10:]
     
-    response = await groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "system", "content": SYSTEM_PROMPT}] + historique,
-        max_tokens=200,
-        temperature=0.8
+    # L'API Claude exige que l'historique commence par un message utilisateur
+    while historique and historique[0]["role"] != "user":
+        historique = historique[1:]
+
+    response = await claude_client.messages.create(
+        model=MODEL,
+        max_tokens=2000,                   # inclut la réflexion interne du modèle
+        output_config={"effort": "low"},
+        system=SYSTEM_PROMPT,
+        messages=historique,
     )
-    
-    reply = response.choices[0].message.content
+
+    if response.stop_reason == "refusal":
+        reply = "Je ne peux pas t'aider sur ce point. On revient à ton choix de spécialité ?"
+    else:
+        reply = "".join(b.text for b in response.content if b.type == "text").strip()
     conversations[channel_id].append({"role": "assistant", "content": reply})
     return reply
 

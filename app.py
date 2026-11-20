@@ -4,13 +4,13 @@ SaviOrientation — backend Python (Flask)
 Rôle :
   - Sert les pages du site (index.html, chat.html, assets/) en local.
   - Expose POST /api/chat : reçoit le profil + l'historique, interroge Claude (Anthropic), renvoie la réponse.
-  - Garde la clé API côté serveur (variable d'environnement ANTHROPIC_API_KEY), jamais dans le navigateur.
+  - S'authentifie auprès d'Anthropic par OIDC (Workload Identity Federation) : aucune clé API stockée.
 
 Historique : la v1 utilisait Llama 3.3 70B via l'API Groq. Le projet est passé à Claude Haiku 5.5.
 
 Lancer en local :
     pip install -r requirements.txt
-    export ANTHROPIC_API_KEY=...   (ou fichier .env)
+    (identifiants : variables OIDC sur Render, ou `ant auth login` en local)
     python app.py                  -> http://localhost:5000
 """
 import os
@@ -97,9 +97,9 @@ _client = None
 def get_client():
     global _client
     if _client is None:
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            raise RuntimeError("ANTHROPIC_API_KEY manquante")
-        _client = anthropic.Anthropic()  # lit ANTHROPIC_API_KEY
+        # Authentification OIDC (Workload Identity Federation) : le SDK lit tout seul
+        # ANTHROPIC_FEDERATION_RULE_ID, ANTHROPIC_ORGANIZATION_ID et le jeton d'identité.
+        _client = anthropic.Anthropic()
     return _client
 
 
@@ -171,7 +171,7 @@ def chat():
     except anthropic.APIStatusError as exc:
         app.logger.error("Erreur API Claude %s : %s", exc.status_code, exc.message)
         return jsonify({"error": "Le service d'IA est momentanément indisponible."}), 502
-    except (anthropic.APIConnectionError, RuntimeError) as exc:
+    except anthropic.APIConnectionError as exc:
         app.logger.error("Erreur Claude : %s", exc)
         return jsonify({"error": "Le service d'IA est momentanément indisponible."}), 502
 
