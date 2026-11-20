@@ -6,7 +6,7 @@
 // En local, le site tourne sur localhost:8000 et l'API sur localhost:5000.
 const BACKEND_URL = ["localhost", "127.0.0.1"].includes(location.hostname)
   ? "http://localhost:5000"
-  : "https://saviorientation.onrender.com"; // ← à remplacer par l'URL réelle du backend Render
+  : "https://saviorientation.onrender.com";
 const API_URL = BACKEND_URL + "/api/chat";
 
 // Le backend gratuit de Render s'endort après 15 min d'inactivité : on le réveille dès l'ouverture
@@ -57,12 +57,19 @@ function checkReady() {
 }
 $("prenom-input").addEventListener("input", checkReady);
 
-$("ob-form").addEventListener("submit", e => {
-  e.preventDefault();
-  if ($("btn-start").disabled) return;
-  userName = $("prenom-input").value.trim();
+// ---------- Sauvegarde ----------
+// sessionStorage : la conversation survit à un rafraîchissement, mais disparaît quand on ferme
+// l'onglet (important sur les ordinateurs partagés du lycée). Rien n'est envoyé ailleurs.
+const STORE_KEY = "saviorientation-conversation";
+
+function save() {
+  sessionStorage.setItem(STORE_KEY, JSON.stringify({ userName, userSpecs, history }));
+}
+
+function showChat() {
   $("onboarding").style.display = "none";
   $("chat-screen").style.display = "flex";
+  $("new-chat").style.display = "inline";
 
   const profile = $("profile");
   profile.innerHTML = "";
@@ -72,14 +79,28 @@ $("ob-form").addEventListener("submit", e => {
     profile.appendChild(span);
   });
   profile.style.display = "flex";
+}
+
+$("ob-form").addEventListener("submit", e => {
+  e.preventDefault();
+  if ($("btn-start").disabled) return;
+  userName = $("prenom-input").value.trim();
+  showChat();
 
   const greeting =
-    `Salut ${userName} ! 👋 Je vois que tu suis ${userSpecs[0]}, ${userSpecs[1]} et ${userSpecs[2]}.\n\n` +
+    `Salut ${userName} ! Je vois que tu suis ${userSpecs[0]}, ${userSpecs[1]} et ${userSpecs[2]}.\n\n` +
     `Avant de te donner des pistes, j'aimerais mieux te connaître. ` +
     `Qu'est-ce qui t'attire le plus dans tes études en ce moment, en cours ou en dehors ?`;
   history.push({ role: "assistant", content: greeting });
+  save();
   addMessage("bot", greeting);
   $("user-input").focus();
+});
+
+$("new-chat").addEventListener("click", () => {
+  if (!confirm("Effacer cette conversation et recommencer ?")) return;
+  sessionStorage.removeItem(STORE_KEY);
+  location.reload();
 });
 
 // ---------- Messages ----------
@@ -139,6 +160,7 @@ async function sendMessage() {
     if (!res.ok || !data.reply) throw new Error(data.error || `HTTP ${res.status}`);
 
     history.push({ role: "assistant", content: data.reply });
+    save();
     typing.remove();
     addMessage("bot", data.reply);
   } catch (err) {
@@ -167,3 +189,15 @@ $("user-input").addEventListener("input", function () {
   this.style.height = "auto";
   this.style.height = Math.min(this.scrollHeight, 140) + "px";
 });
+
+// ---------- Reprise après rafraîchissement ----------
+try {
+  const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) || "null");
+  if (saved && saved.userName && saved.userSpecs?.length === 3 && saved.history?.length) {
+    ({ userName, userSpecs, history } = saved);
+    showChat();
+    history.forEach(m => addMessage(m.role === "assistant" ? "bot" : "user", m.content));
+  }
+} catch {
+  sessionStorage.removeItem(STORE_KEY);
+}
