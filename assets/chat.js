@@ -3,14 +3,15 @@
 // et c'est le backend qui interroge Claude (Anthropic) avec la clé stockée en variable d'environnement.
 
 // URL du backend. Sur le site statique (GitHub Pages), on appelle le backend hébergé à part.
-// En local (python app.py), Flask sert aussi les pages, donc on utilise le même domaine.
-const BACKEND_URL = "https://saviorientation.onrender.com"; // ← à remplacer par l'URL réelle du backend
-const STATIC_HOSTS = ["saviorientation.app", "www.saviorientation.app", "yohann-evans.github.io"];
-const API_URL = (STATIC_HOSTS.includes(location.hostname) ? BACKEND_URL : "") + "/api/chat";
+// En local, le site tourne sur localhost:8000 et l'API sur localhost:5000.
+const BACKEND_URL = ["localhost", "127.0.0.1"].includes(location.hostname)
+  ? "http://localhost:5000"
+  : "https://saviorientation.onrender.com"; // ← à remplacer par l'URL réelle du backend Render
+const API_URL = BACKEND_URL + "/api/chat";
 
 // Le backend gratuit de Render s'endort après 15 min d'inactivité : on le réveille dès l'ouverture
 // de la page, pour qu'il soit prêt quand l'élève envoie son premier message.
-if (API_URL.startsWith("http")) fetch(BACKEND_URL + "/health", { mode: "no-cors" }).catch(() => {});
+fetch(BACKEND_URL + "/health", { mode: "no-cors" }).catch(() => {});
 
 const SPECS = ["Maths", "Physique-Chimie", "SVT", "NSI", "SES", "HLP", "HGGSP", "LLCE", "AMC"];
 

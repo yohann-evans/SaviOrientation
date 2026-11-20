@@ -2,21 +2,23 @@
 SaviOrientation — backend Python (Flask)
 
 Rôle :
-  - Sert les pages du site (index.html, chat.html, assets/) en local.
   - Expose POST /api/chat : reçoit le profil + l'historique, interroge Claude (Anthropic), renvoie la réponse.
-  - S'authentifie auprès d'Anthropic par OIDC (Workload Identity Federation) : aucune clé API stockée.
+  - Garde la clé API côté serveur (variable d'environnement ANTHROPIC_API_KEY), jamais dans le navigateur.
+
+Les pages du site sont hébergées sur GitHub Pages ; ce serveur ne sert QUE l'API.
 
 Historique : la v1 utilisait Llama 3.3 70B via l'API Groq. Le projet est passé à Claude Haiku 5.5.
 
 Lancer en local :
     pip install -r requirements.txt
-    (identifiants : variables OIDC sur Render, ou `ant auth login` en local)
-    python app.py                  -> http://localhost:5000
+    export ANTHROPIC_API_KEY=...   (ou fichier .env, jamais commité)
+    python app.py                  -> API sur http://localhost:5000
+    python -m http.server 8000     -> site sur http://localhost:8000 (autre terminal)
 """
 import os
 
 import anthropic
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request
 
 try:
     from dotenv import load_dotenv
@@ -24,7 +26,6 @@ try:
 except ImportError:
     pass
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL = "claude-haiku-5-5"
 MAX_HISTORY = 16          # nombre de messages envoyés au modèle
 MAX_MESSAGE_CHARS = 1500
@@ -36,6 +37,8 @@ ALLOWED_ORIGINS = {
         "https://saviorientation.app,https://www.saviorientation.app,https://yohann-evans.github.io",
     ).split(",") if o.strip()
 }
+if not os.getenv("RENDER"):  # en local (Render définit RENDER=true)
+    ALLOWED_ORIGINS |= {"http://localhost:8000", "http://127.0.0.1:8000"}
 
 # Spécialités proposées au LFDS (grille 2024/2025 + AMC)
 SPECIALITES = {
@@ -97,9 +100,7 @@ _client = None
 def get_client():
     global _client
     if _client is None:
-        # Authentification OIDC (Workload Identity Federation) : le SDK lit tout seul
-        # ANTHROPIC_FEDERATION_RULE_ID, ANTHROPIC_ORGANIZATION_ID et le jeton d'identité.
-        _client = anthropic.Anthropic()
+        _client = anthropic.Anthropic()  # lit ANTHROPIC_API_KEY
     return _client
 
 
@@ -188,22 +189,6 @@ def chat():
 @app.route("/health")
 def health():
     return {"status": "ok"}
-
-
-# --- Pages du site (utile en local et si tout est hébergé sur Render) ---
-@app.route("/")
-def index():
-    return send_from_directory(ROOT, "index.html")
-
-
-@app.route("/chat.html")
-def chat_page():
-    return send_from_directory(ROOT, "chat.html")
-
-
-@app.route("/assets/<path:filename>")
-def assets(filename):
-    return send_from_directory(os.path.join(ROOT, "assets"), filename)
 
 
 @app.errorhandler(404)
